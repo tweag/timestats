@@ -1,0 +1,32 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build:
+    name: Build & Test - ghc ${{ matrix.ghc }}
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        cabal: ["3.6"]
+        ghc:
+          - "9.2.3"
+
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          submodules: true
+
+      - name: Setup GHC and cabal-install
+        uses: haskell/actions/setup@v2
+        with:
+          ghc-version: ${{ matrix.ghc }}
+          cabal-version: ${{ matrix.cabal }}
+
+      - name: Update package list
+        run: cabal update
+
+      - name: Build & Test
+        run: cabal test all --test-show-details=direct --flag devel
