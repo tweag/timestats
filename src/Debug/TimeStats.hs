@@ -39,8 +39,9 @@ import qualified Data.Map as Map
 import Data.Text (Text)
 import qualified Data.Text as Text
 import qualified Data.Text.IO as Text
+import Data.Word
+import GHC.Clock
 import Text.Printf
-import System.Clock
 import System.Environment (lookupEnv)
 import System.IO (Handle, stderr)
 import System.IO.Unsafe (unsafePerformIO)
@@ -209,10 +210,10 @@ asText stats =
 -- | A reference to a 'TimeStats' value
 newtype TimeStatsRef = TimeStatsRef (IORef TimeStats)
 
--- | Reports how much the invocations to 'measureM' took for a given label
--- and how many times it was invoked on a given label.
+-- | Reports how much time (in nanoseconds) the invocations to 'measureM' took
+-- for a given label and how many times it was invoked on a given label.
 data TimeStats = TimeStats
-    { timeStat :: {-# UNPACK #-} !TimeSpec
+    { timeStat :: {-# UNPACK #-} !Word64
     , countStat :: {-# UNPACK #-} !Int
     }
   deriving Show
@@ -229,13 +230,13 @@ newTimeStatsRef = liftIO $ TimeStatsRef <$> newIORef initialTimeStats
 -- the given reference to time stats.
 measureMWith :: MonadIO m => TimeStatsRef -> m a -> m a
 measureMWith tref m = do
-    t0 <- liftIO $ getTime Monotonic
+    t0 <- liftIO getMonotonicTimeNSec
     a <- m
     liftIO $ do
-      tf <- getTime Monotonic
+      tf <- getMonotonicTimeNSec
       updateTimeStatsRef tref $ \st ->
         st
-          { timeStat = diffTimeSpec tf t0 + timeStat st
+          { timeStat = (tf - t0) + timeStat st
           , countStat = 1 + countStat st
           }
     return a
