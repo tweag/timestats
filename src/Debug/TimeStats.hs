@@ -39,9 +39,9 @@ import qualified Data.Map as Map
 import Data.Text (Text)
 import qualified Data.Text as Text
 import qualified Data.Text.IO as Text
-import Data.Word
-import GHC.Clock
-import Text.Printf
+import Data.Word (Word64)
+import GHC.Clock (getMonotonicTimeNSec)
+import Text.Printf (printf)
 import System.Environment (lookupEnv)
 import System.IO (Handle, stderr)
 import System.IO.Unsafe (unsafePerformIO)
