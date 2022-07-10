@@ -6,7 +6,8 @@ instrumenting the code with a few calls and then building and
 running the application as usual.
 
 This library associates fragments of a program with labels, and
-measures the execution time of these fragments.
+measures the execution time of these fragments using the function
+[getMonotonicTimeNSec](https://hackage.haskell.org/package/base-4.16.2.0/docs/GHC-Clock.html#v:getMonotonicTimeNSec).
 
 Multiple measures of a same program fragment (or different fragments
 using the same label) are aggregated and reported at chosen times of
