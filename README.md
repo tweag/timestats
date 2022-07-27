@@ -1,9 +1,9 @@
 # timestats
 
-This library implements time profiling by focusing on
-simplicity of use. Most programs should be possible to analyze by
-instrumenting the code with a few calls and then building and
-running the application as usual.
+This is a simple library for profiling time that can help when more
+sophisticated tools aren't available or needed. Most programs should
+be possible to analyze by instrumenting the code with a few calls
+and then building and running the application as usual.
 
 This library associates fragments of a program with labels, and
 measures the execution time of these fragments using the function
