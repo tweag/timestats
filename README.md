@@ -13,6 +13,11 @@ Multiple measures of a same program fragment (or different fragments
 using the same label) are aggregated and reported at chosen times of
 the execution.
 
+See the [announcement post][timestats-announcement] for additional
+motivation.
+
+[timestats-announcement]: https://www.tweag.io/blog/2022-07-28-timestats/
+
 ## Usage
 
 ```Haskell
@@ -46,3 +51,6 @@ fib2: 2.071s  count: 2
 `DEBUG_TIMESTATS_ENABLE` to any value ahead of invoking any function
 in [Debug.TimeStats](src/Debug/TimeStats.hs).
 
+See the [API documentation][timestats-hackage] for further details.
+
+[timestats-hackage]: https://hackage.haskell.org/package/timestats
