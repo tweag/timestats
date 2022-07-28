@@ -13,7 +13,7 @@ Multiple measures of a same program fragment (or different fragments
 using the same label) are aggregated and reported at chosen times of
 the execution.
 
-See the [announcement post][timestats-announcement] for additional
+The [announcement post][timestats-announcement] contains additional
 motivation.
 
 [timestats-announcement]: https://www.tweag.io/blog/2022-07-28-timestats/
