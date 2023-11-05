@@ -40,6 +40,7 @@ import Data.Text (Text)
 import qualified Data.Text as Text
 import qualified Data.Text.IO as Text
 import Data.Word (Word64)
+import Debug.TimeStats.Internal (formatIntWithSeparator)
 import GHC.Clock (getMonotonicTimeNSec)
 import Text.Printf (printf)
 import System.Environment (lookupEnv)
@@ -190,7 +191,7 @@ asText stats =
     formatTimeStats :: TimeStats -> (String, String)
     formatTimeStats t =
       ( printf "%.3f" (fromIntegral (timeStat t) / 1e9 :: Double)
-      , printf "%d" (countStat t)
+      , formatIntWithSeparator '_' (countStat t) ""
       )
 
     -- At the time of this writing printf can't render to 'Text'.

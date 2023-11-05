@@ -24,6 +24,7 @@ flag devel
 
 library
     exposed-modules:  Debug.TimeStats
+                      Debug.TimeStats.Internal
     build-depends:    base, containers, text
     hs-source-dirs:   src
     default-language: Haskell2010
