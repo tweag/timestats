@@ -14,7 +14,7 @@ fib n = if n < 2 then 1 else fib (n - 1) + fib (n - 2)
 main :: IO ()
 main = do
     testMeasureM
-    testFormatNatWithSeparator
+    testFormatIntWithSeparator
 
 testMeasureM :: IO ()
 testMeasureM = do
@@ -36,8 +36,8 @@ testMeasureM = do
     eqStat (lbl0, ts0) (lbl1, ts1) =
       lbl0 == lbl1 && TimeStats.countStat ts0 == TimeStats.countStat ts1
 
-testFormatNatWithSeparator :: IO ()
-testFormatNatWithSeparator = do
+testFormatIntWithSeparator :: IO ()
+testFormatIntWithSeparator = do
     testCase   123456789   "123_456_789"
     testCase    23456789    "23_456_789"
     testCase     3456789     "3_456_789"
