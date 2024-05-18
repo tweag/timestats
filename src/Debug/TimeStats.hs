@@ -253,17 +253,15 @@ updateTimeStatsRef (TimeStatsRef ref) f =
 ---------------------
 
 -- | Hack to intersperse IO actions into any monad
-intersperseIOinM :: forall a m. Monad m => IO a -> m a
+intersperseIOinM :: Monad m => IO a -> m a
 intersperseIOinM m = do
-    -- The ficticious state is only used to force unsafePerformIO to run @m@
-    -- every time @intersperseIOinM m@ is evaluated.
+    -- The fictitious state is only used to force @unsafePerformIO@
+    -- to run @m@ every time @intersperseIOinM m@ is evaluated.
     s <- getStateM
-    pure $! snd $ unsafePerformIO $ do
-      r <- m
-      pure (s, r)
+    case unsafePerformIO $ (,) s <$> m of
+      (_, r) -> pure r
   where
     -- We mark this function as NOINLINE to ensure the compiler cannot reason
-    -- that two calls of @getStateM@ might yield the same value.
+    -- by unfolding that two calls of @getStateM@ yield the same value.
     {-# NOINLINE getStateM #-}
-    getStateM :: m Int
-    getStateM = pure 0
+    getStateM = pure True
