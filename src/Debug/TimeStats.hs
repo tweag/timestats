@@ -1,5 +1,3 @@
-{-# LANGUAGE ScopedTypeVariables #-}
-
 -- | A module to collect aggregates on how much time is spent in a computation
 --
 -- Aggregates can be identified with a label that determines where the time of
@@ -33,6 +31,7 @@ module Debug.TimeStats
 
 import Control.Exception (evaluate)
 import Control.Monad (forM, forM_, unless)
+import Control.Monad.IO.Class (MonadIO(liftIO))
 import Data.IORef
 import Data.Map (Map)
 import Data.Maybe (isJust)
@@ -67,7 +66,7 @@ import System.IO.Unsafe (unsafePerformIO)
 -- evaluated.
 --
 {-# INLINE measureM #-}
-measureM :: Monad m => String -> m a -> m a
+measureM :: MonadIO m => String -> m a -> m a
 measureM label =
     -- See the documentation of 'enabled'
     if enabled then do
@@ -126,8 +125,8 @@ labelStatsMapRef :: IORef (Map String TimeStatsRef)
 labelStatsMapRef = unsafePerformIO $ newIORef Map.empty
 
 -- | Set all statistics to initial values.
-reset :: Monad m => m ()
-reset = intersperseIOinM $
+reset :: MonadIO m => m ()
+reset = liftIO $
     if enabled then do
       m <- readIORef labelStatsMapRef
       forM_ (Map.elems m) $ \(TimeStatsRef ref) ->
@@ -137,7 +136,7 @@ reset = intersperseIOinM $
 
 -- | Run an action by previously reseting all stats to initial values
 -- and printing them afterwards.
-scope :: Monad m => m a -> m a
+scope :: MonadIO m => m a -> m a
 scope =
     if enabled then
       \m -> do
@@ -160,21 +159,21 @@ lookupTimeStatsRef label = do
         Just r -> (m, r)
 
 -- | Yields the labels and the stats collected thus far.
-collect :: Monad m => m [(String, TimeStats)]
-collect = intersperseIOinM $ do
+collect :: MonadIO m => m [(String, TimeStats)]
+collect = liftIO $ do
     m <- readIORef labelStatsMapRef
     forM (Map.toList m) $ \(label, TimeStatsRef ref) ->
       (,) label <$> readIORef ref
 
 -- | Prints the time stats to the given handle.
-hPrintTimeStats :: Monad m => Handle -> m ()
-hPrintTimeStats h = intersperseIOinM $ do
+hPrintTimeStats :: MonadIO m => Handle -> m ()
+hPrintTimeStats h = liftIO $ do
     xs <- collect
     unless (null xs) $
       Text.hPutStrLn h (asText xs)
 
 -- | Prints the time stats to stderr.
-printTimeStats :: Monad m => m ()
+printTimeStats :: MonadIO m => m ()
 printTimeStats = hPrintTimeStats stderr
 
 -- | Renders the given time stats in a tabular format
@@ -225,16 +224,16 @@ initialTimeStats :: TimeStats
 initialTimeStats = TimeStats 0 0
 
 -- | Creates a reference to time stats with intial values
-newTimeStatsRef :: Monad m => m TimeStatsRef
-newTimeStatsRef = intersperseIOinM $ TimeStatsRef <$> newIORef initialTimeStats
+newTimeStatsRef :: MonadIO m => m TimeStatsRef
+newTimeStatsRef = liftIO $ TimeStatsRef <$> newIORef initialTimeStats
 
 -- | Measure the time it takes to run the given action and update with it
 -- the given reference to time stats.
-measureMWith :: Monad m => TimeStatsRef -> m a -> m a
+measureMWith :: MonadIO m => TimeStatsRef -> m a -> m a
 measureMWith tref m = do
-    t0 <- intersperseIOinM getMonotonicTimeNSec
+    t0 <- liftIO getMonotonicTimeNSec
     a <- m
-    intersperseIOinM $ do
+    liftIO $ do
       tf <- getMonotonicTimeNSec
       updateTimeStatsRef tref $ \st ->
         st
@@ -247,21 +246,3 @@ measureMWith tref m = do
 updateTimeStatsRef :: TimeStatsRef -> (TimeStats -> TimeStats) -> IO ()
 updateTimeStatsRef (TimeStatsRef ref) f =
     atomicModifyIORef' ref $ \st -> (f st, ())
-
----------------------
--- intersperseIOinM
----------------------
-
--- | Hack to intersperse IO actions into any monad
-intersperseIOinM :: Monad m => IO a -> m a
-intersperseIOinM m = do
-    -- The fictitious state is only used to force @unsafePerformIO@
-    -- to run @m@ every time @intersperseIOinM m@ is evaluated.
-    s <- getStateM
-    case unsafePerformIO $ (,) s <$> m of
-      (_, r) -> pure r
-  where
-    -- We mark this function as NOINLINE to ensure the compiler cannot reason
-    -- by unfolding that two calls of @getStateM@ yield the same value.
-    {-# NOINLINE getStateM #-}
-    getStateM = pure True
