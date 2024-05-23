@@ -1,5 +1,9 @@
 # Revision history for timestats
 
+## next version
+
+* Expose `Debug.TimeStats.measureMWithLiftIO`.
+
 ## 0.1.4.1 -- 2024-05-23
 
 * Add `Debug.TimeStats.Unsafe.unsafeMeasureM` to measure in some more monads.

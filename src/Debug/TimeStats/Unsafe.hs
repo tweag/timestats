@@ -10,11 +10,8 @@ module Debug.TimeStats.Unsafe
   ) where
 
 import Debug.TimeStats
-         ( TimeStats(..)
-         , TimeStatsRef
-         , enabled
-         , lookupTimeStatsRef
-         , updateTimeStatsRef
+         ( lookupTimeStatsRef
+         , measureMWithLiftIO
          )
 import GHC.Clock (getMonotonicTimeNSec)
 import System.IO.Unsafe (unsafePerformIO)
@@ -24,15 +21,15 @@ import System.IO.Unsafe (unsafePerformIO)
 -- This function relies on a hack to perform IO in any monad, which does not
 -- always work. In particular, we can expect it to miss time in monads where
 --
--- > (m >>= \_ -> undefined) == undefined -- for some computation m
+-- > seq (m >>= \_ -> undefined) () == undefined -- for some computation m
 --
 -- An example of such a monad is the list monad
 --
--- > ([()] >>= \_ -> undefined) == undefined
+-- > seq ([()] >>= \_ -> undefined) () == undefined
 --
 -- Another example is the monad @Control.Monad.Free.Free f@.
 --
--- > (Control.Monad.Free.Pure () >>= \_ -> undefined) == undefined
+-- > seq (return () >>= \_ -> undefined :: Free IO ()) () == undefined
 --
 -- But it seems to work in monads with state like @IO@, @ReaderT IO@, and
 -- @Control.Monad.State.State s@.
@@ -41,27 +38,7 @@ import System.IO.Unsafe (unsafePerformIO)
 --
 {-# INLINE unsafeMeasureM #-}
 unsafeMeasureM :: Monad m => String -> m a -> m a
-unsafeMeasureM label =
-    if enabled then do
-      let ref = unsafePerformIO $ lookupTimeStatsRef label
-       in \action -> measureMWith ref action
-    else
-      id
-
--- | Measure the time it takes to run the given action and update with it
--- the given reference to time stats.
-measureMWith :: Monad m => TimeStatsRef -> m a -> m a
-measureMWith tref m = do
-    t0 <- intersperseIOinM getMonotonicTimeNSec
-    a <- m
-    intersperseIOinM $ do
-      tf <- getMonotonicTimeNSec
-      updateTimeStatsRef tref $ \st ->
-        st
-          { timeStat = (tf - t0) + timeStat st
-          , countStat = 1 + countStat st
-          }
-    return a
+unsafeMeasureM label = measureMWithLiftIO label intersperseIOinM
 
 ---------------------
 -- intersperseIOinM

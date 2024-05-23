@@ -1,3 +1,4 @@
+{-# LANGUAGE RankNTypes #-}
 -- | A module to collect aggregates on how much time is spent in a computation
 --
 -- Aggregates can be identified with a label that determines where the time of
@@ -25,9 +26,10 @@ module Debug.TimeStats
     -- but they can be handy to implement other measuring primitives.
     --
   , TimeStatsRef
-  , lookupTimeStatsRef
-  , updateTimeStatsRef
   , enabled
+  , lookupTimeStatsRef
+  , measureMWithLiftIO
+  , updateTimeStatsRef
   ) where
 
 import Control.Exception (evaluate)
@@ -71,13 +73,19 @@ import System.IO.Unsafe (unsafePerformIO)
 --
 {-# INLINE measureM #-}
 measureM :: MonadIO m => String -> m a -> m a
-measureM label =
+measureM label = measureMWithLiftIO label liftIO
+
+-- | Like 'measureM' but allows to change the function to lift IO into the
+-- monad.
+{-# INLINE measureMWithLiftIO #-}
+measureMWithLiftIO :: Monad m => String -> (forall b. IO b -> m b) -> m a -> m a
+measureMWithLiftIO label lift =
     -- See the documentation of 'enabled'
     if enabled then do
           -- @ref@ is the reference to the stats associated to the label.
           -- See note [Looking up stats with unsafePerformIO]
       let ref = unsafePerformIO $ lookupTimeStatsRef label
-       in \action -> measureMWith ref action
+       in \action -> measureMWithRef lift ref action
     else
       id
 
@@ -232,12 +240,12 @@ newTimeStatsRef :: MonadIO m => m TimeStatsRef
 newTimeStatsRef = liftIO $ TimeStatsRef <$> newIORef initialTimeStats
 
 -- | Measure the time it takes to run the given action and update with it
--- the given reference to time stats.
-measureMWith :: MonadIO m => TimeStatsRef -> m a -> m a
-measureMWith tref m = do
-    t0 <- liftIO getMonotonicTimeNSec
+-- the given reference to time stats, using the given IO lifting function.
+measureMWithRef :: Monad m => (forall b. IO b -> m b) -> TimeStatsRef -> m a -> m a
+measureMWithRef lift tref m = do
+    t0 <- lift getMonotonicTimeNSec
     a <- m
-    liftIO $ do
+    lift $ do
       tf <- getMonotonicTimeNSec
       updateTimeStatsRef tref $ \st ->
         st
