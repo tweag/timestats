@@ -27,6 +27,7 @@ module Debug.TimeStats
   , TimeStatsRef
   , lookupTimeStatsRef
   , updateTimeStatsRef
+  , enabled
   ) where
 
 import Control.Exception (evaluate)
@@ -64,6 +65,9 @@ import System.IO.Unsafe (unsafePerformIO)
 -- Time measures aren't collected either if the environment variable
 -- @DEBUG_TIMESTATS_ENABLE@ isn't set the first time this function is
 -- evaluated.
+--
+-- Monads that run the continuation of bind multiple times might only
+-- have accounted the time to run the first time only.
 --
 {-# INLINE measureM #-}
 measureM :: MonadIO m => String -> m a -> m a

@@ -1,5 +1,10 @@
 # Revision history for timestats
 
+## next
+
+* Add `Debug.TimeStats.Unsafe.unsafeMeasureM` to measure in some more monads.
+* Expose `Debug.TimeStats.enabled`.
+
 ## 0.1.3 -- 2024-05-19
 
 * Change the type of `measureM` to work with MonadIO instances only.
