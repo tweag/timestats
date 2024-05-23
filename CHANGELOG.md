@@ -1,6 +1,6 @@
 # Revision history for timestats
 
-## next
+## 0.1.4.1 -- 2024-05-23
 
 * Add `Debug.TimeStats.Unsafe.unsafeMeasureM` to measure in some more monads.
 * Expose `Debug.TimeStats.enabled`.
