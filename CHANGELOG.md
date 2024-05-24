@@ -1,6 +1,6 @@
 # Revision history for timestats
 
-## next version
+## 0.2.0 -- 2024-05-24
 
 * Expose `Debug.TimeStats.measureMWithLiftIO`.
 
