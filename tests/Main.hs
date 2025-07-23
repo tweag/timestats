@@ -70,7 +70,7 @@ testUnsafeMeasureM :: IO ()
 testUnsafeMeasureM = do
     setEnv "DEBUG_TIMESTATS_ENABLE" "1"
     TimeStats.reset
-    evaluate $ (`execState` 0) $
+    _ <- evaluate $ (`execState` 0) $
       TimeStats.unsafeMeasureM "fib" $ put (fib 40)
     xs <- TimeStats.collect
     let expected =
@@ -86,5 +86,6 @@ testUnsafeMeasureM = do
 
 eqStats :: Eq a => [(a, TimeStats.TimeStats)] -> [(a, TimeStats.TimeStats)] -> Bool
 eqStats xs ys = length xs == length ys && and (zipWith eqStat xs ys)
-eqStat (lbl0, ts0) (lbl1, ts1) =
-    lbl0 == lbl1 && TimeStats.countStat ts0 == TimeStats.countStat ts1
+  where
+    eqStat (lbl0, ts0) (lbl1, ts1) =
+      lbl0 == lbl1 && TimeStats.countStat ts0 == TimeStats.countStat ts1
