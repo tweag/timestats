@@ -1,5 +1,9 @@
 # Revision history for timestats
 
+## 0.2.1 -- 2025-07-24
+
+* Avoid negative measures when measuring the lazy State monad (#5).
+
 ## 0.2.0 -- 2024-05-24
 
 * Expose `Debug.TimeStats.measureMWithLiftIO`.
