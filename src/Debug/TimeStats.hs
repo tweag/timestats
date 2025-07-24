@@ -1,3 +1,4 @@
+{-# LANGUAGE BangPatterns #-}
 {-# LANGUAGE RankNTypes #-}
 -- | A module to collect aggregates on how much time is spent in a computation
 --
@@ -243,10 +244,10 @@ newTimeStatsRef = liftIO $ TimeStatsRef <$> newIORef initialTimeStats
 -- the given reference to time stats, using the given IO lifting function.
 measureMWithRef :: Monad m => (forall b. IO b -> m b) -> TimeStatsRef -> m a -> m a
 measureMWithRef lift tref m = do
-    t0 <- lift getMonotonicTimeNSec
+    !t0 <- lift getMonotonicTimeNSec
     a <- m
     lift $ do
-      tf <- getMonotonicTimeNSec
+      !tf <- getMonotonicTimeNSec
       updateTimeStatsRef tref $ \st ->
         st
           { timeStat = (tf - t0) + timeStat st

@@ -9,11 +9,7 @@ module Debug.TimeStats.Unsafe
   ( unsafeMeasureM
   ) where
 
-import Debug.TimeStats
-         ( lookupTimeStatsRef
-         , measureMWithLiftIO
-         )
-import GHC.Clock (getMonotonicTimeNSec)
+import Debug.TimeStats (measureMWithLiftIO)
 import System.IO.Unsafe (unsafePerformIO)
 
 -- | Like 'Debug.TimeStats.measureM' but can measure other monads.

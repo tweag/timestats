@@ -36,7 +36,7 @@ library
 test-suite tests
   type: exitcode-stdio-1.0
   main-is: Main.hs
-  build-depends: base, text, timestats
+  build-depends: base, mtl, text, timestats
   if flag(devel)
     ghc-options: -Wall -Werror
   hs-source-dirs: tests
