@@ -3,6 +3,10 @@ name:               timestats
 version:            0.2.1
 
 synopsis: A library for profiling time in Haskell applications
+description: This library provides some utilities for instrumenting Haskell
+             applications to collect time measures of various fragments of
+             code. This is useful to measure wall-clock time when running a
+             given piece of Haskell code. See the README for more details.
 
 homepage:    https://github.com/tweag/timestats
 bug-reports: https://github.com/tweag/timestats/issues
@@ -13,9 +17,13 @@ author:     Facundo Domínguez
 maintainer: facundo.dominguez@tweag.io
 
 category: Profiling
-extra-source-files:
+extra-doc-files:
     CHANGELOG.md
     README.md
+
+source-repository head
+  type:     git
+  location: https://github.com/tweag/timestats
 
 flag devel
   default:     False
