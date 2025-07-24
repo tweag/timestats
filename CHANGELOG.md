@@ -2,7 +2,7 @@
 
 ## 0.2.1 -- 2025-07-24
 
-* Avoid negative measures when measuring the lazy State monad (#5).
+* Avoid negative measures when measuring the lazy State monad ([#5](https://github.com/tweag/timestats/pull/5)).
 
 ## 0.2.0 -- 2024-05-24
 
